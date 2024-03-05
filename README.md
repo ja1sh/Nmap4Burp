@@ -41,7 +41,7 @@ The Nmap Scanner for Burp Suite is a Burp extension that allows you to run Nmap 
 
 ## Social Media
 
-- Twitter: [@ja1sharma](#)
+- X: [@ja1sharma](https://twitter.com/ja1sharma)
 
 ## Contributing
 
