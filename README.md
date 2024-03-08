@@ -31,6 +31,8 @@ The Nmap Scanner for Burp Suite is a Burp extension that allows you to run Nmap 
 3. Click on the "Run Nmap Scan" button.
 4. View real-time Nmap scan output in the extension UI.
 
+Follow this [Medium](https://ja1sharma.medium.com/nmap4burp-burp-extension-5e2d7ca8927f) tutorial for usage samples
+
 ## Author
 
 [Jai Sharma](#) - [GitHub](https://github.com/ja1sh/Nmap4Burp)
