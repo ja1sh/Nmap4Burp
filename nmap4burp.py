@@ -34,12 +34,18 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
         self._targetField = swing.JTextField()
         self._targetField.setMaximumSize(Dimension(32767, self._targetField.getPreferredSize().height))
         self._targetField.setColumns(20)
+        self._customCommandLabel = swing.JLabel("Enter custom Nmap command:")
+        self._customCommandField = swing.JTextField()
+        self._customCommandField.setMaximumSize(Dimension(32767, self._customCommandField.getPreferredSize().height))
+        self._customCommandField.setColumns(20)
         self._runScanButton = swing.JButton("Run Nmap Scan", actionPerformed=self.runNmapScan)
 
         topPanel.add(self._nmapPathLabel)
         topPanel.add(self._nmapPathField)
         topPanel.add(self._targetLabel)
         topPanel.add(self._targetField)
+        topPanel.add(self._customCommandLabel)
+        topPanel.add(self._customCommandField)
         topPanel.add(self._runScanButton)
 
         self._scrollPane = swing.JScrollPane()
@@ -51,7 +57,7 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
         self._bottomRightPanel.setLayout(BorderLayout())
         self._bottomRightPanel.add(self._scrollPane, BorderLayout.CENTER)
 
-        self._authorLabel = swing.JLabel("Author: " + self.author + " | Version: " + self.version + " | GitHub: " + self.github_link)
+        self._authorLabel = swing.JLabel("Author: " + self.author + " | Version: " + self.version + " | GitHub: "+self.github_link)
         self._bottomRightPanel.add(self._authorLabel, BorderLayout.SOUTH)
 
         self._tab.add(topPanel, BorderLayout.NORTH)
@@ -59,9 +65,11 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
 
         callbacks.addSuiteTab(self)
 
+
     def runNmapScan(self, event):
         nmap_path = self._nmapPathField.getText()
         target = self._targetField.getText()
+        custom_command = self._customCommandField.getText()
 
         if not nmap_path:
             self.printToConsole("Please enter the path to 'nmap' binary.")
@@ -70,7 +78,14 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
             self.printToConsole("Please enter the target IP or domain.")
             return
 
-        Thread(NmapScanner(nmap_path, target, self)).start()
+        if custom_command:
+            command = [nmap_path] + custom_command.split() + [target]
+        else:
+            command = [nmap_path, '-p', '1-1000', target]
+
+        self.printToConsole("Nmap Command: {}".format(" ".join(command)))  # Print the Nmap command
+        Thread(NmapScanner(command, self)).start()
+
 
     def printToConsole(self, message):
         self._callbacks.issueAlert(message)
@@ -78,7 +93,7 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
         self._textArea.append(message + '\n')
 
     def getTabCaption(self):
-        return "Nmap4Burp"
+        return "Nmap 4 Burp"
 
     def getUiComponent(self):
         return self._tab
@@ -86,15 +101,31 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
     def extensionUnloaded(self):
         self.printExtensionInfo()
 
+    def printExtensionInfo(self):
+        info = (
+            "Extension Name: {}\n"
+            "Author: {}\n"
+            "Social Media Links:\n{}\n"
+            "Version: {}\n"
+            "GitHub Link: {}\n"
+        ).format(
+            self._callbacks.getExtensionName(),
+            self.author,
+            "\n".join(["{}: {}".format(platform, link) for platform, link in self.social_media_links.items()]),
+            self.version,
+            self.github_link
+        )
+        self._textArea.setText(info)
+        self.printToConsole("Extension information displayed on the tab.")
+
 class NmapScanner(Runnable):
-    def __init__(self, nmap_path, target, burp_extender):
-        self._nmap_path = nmap_path
-        self._target = target
+    def __init__(self, command, burp_extender):
+        self._command = command
         self._burp_extender = burp_extender
 
     def run(self):
         try:
-            process = subprocess.Popen([self._nmap_path, '-p', '1-1000', self._target], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(self._command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             while True:
                 line = process.stdout.readline().decode('utf-8')
                 if not line:
