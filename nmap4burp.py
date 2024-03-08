@@ -18,7 +18,7 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
 
         callbacks.registerExtensionStateListener(self)
         self.author = "Jai Sharma"
-        self.version = "1.0.0"
+        self.version = "1.0.1"
         self.github_link = "https://github.com/ja1sh/Nmap4Burp"
 
         self._tab = swing.JPanel()
