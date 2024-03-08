@@ -39,7 +39,7 @@ Follow this [Medium](https://ja1sharma.medium.com/nmap4burp-burp-extension-5e2d7
 
 ## Version
 
-1.0.0
+1.0.1
 
 ## Social Media
 
